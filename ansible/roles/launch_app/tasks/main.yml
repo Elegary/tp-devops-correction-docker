@@ -1,0 +1,14 @@
+- name: Run app container
+  docker_container:
+    name: simple-api
+    image: rorodu92/tp-devops-simple-api
+    state: started
+    restart_policy: always
+    networks:
+      - name: app-network
+
+    env:
+      DATABASE_HOST: database
+      DATABASE_NAME: db
+      DATABASE_USER: "{{ database_user }}"
+      DATABASE_PASSWORD: "{{ database_password }}"

@@ -1,0 +1,18 @@
+- name: Create database volume
+  docker_volume:
+    name: db-data
+
+- name: Run MySQL database container
+  docker_container:
+    name: database
+    image: rorodu92/tp-devops-database
+    state: started
+    restart_policy: always
+    networks:
+      - name: app-network
+
+    env:
+      POSTGRES_USER: "{{ database_user }}"
+      POSTGRES_PASSWORD: "{{ database_password }}"
+    volumes:
+      - db-data:/var/lib/postgresql/data

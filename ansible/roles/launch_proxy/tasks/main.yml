@@ -1,0 +1,10 @@
+- name: Run proxy container
+  docker_container:
+    name: httpd
+    image: rorodu92/tp-devops-httpd
+    state: started
+    restart_policy: always
+    networks:
+      - name: app-network
+    ports:
+      - "80:80"
