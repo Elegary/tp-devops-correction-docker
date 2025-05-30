@@ -56,3 +56,55 @@ jobs:
           context: ./http-server
           push: true
           tags: ${{secrets.DOCKERHUB_USERNAME}}/tp-devops-httpd:latest
+
+   # Deploy with Ansible - only runs after successful Docker build
+  ansible-deploy:
+    needs: [test-backend, build-and-push-docker-image] # Wait for tests and Docker build
+    runs-on: ubuntu-24.04
+    # Only run this job if we're on the main branch
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install Ansible
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ansible
+          
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
+          
+      - name: Test SSH connection
+        run: |
+          ssh -o ConnectTimeout=10 ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "echo 'SSH connection successful'"
+          
+      - name: Create Ansible inventory
+        run: |
+          mkdir -p ansible/inventories
+          cat > ansible/inventories/production.yml << EOF
+          all:
+            hosts:
+              production:
+                ansible_host: ${{ secrets.DEPLOY_HOST }}
+                ansible_user: ${{ secrets.DEPLOY_USER }}
+                ansible_ssh_private_key_file: ~/.ssh/id_rsa
+          EOF
+          
+      - name: Run Ansible deployment
+        run: |
+          cd ansible
+          ansible-playbook -i inventories/production.yml playbook.yml \
+            --extra-vars "database_user=${{ secrets.DATABASE_USER }}" \
+            --extra-vars "database_password=${{ secrets.DATABASE_PASSWORD }}" \
+            --extra-vars "dockerhub_username=${{ secrets.DOCKERHUB_USERNAME }}" \
+            -v
+            
+      - name: Verify deployment
+        run: |
+          sleep 30  # Wait for containers to start
+          curl -f http://${{ secrets.DEPLOY_HOST }}/actuator/health || echo "Health check failed"
