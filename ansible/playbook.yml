@@ -8,6 +8,7 @@
       - create_network
       - launch_database
       - launch_app
+      - launch_frontend
       - launch_proxy
   tasks:
    - name: Test connection
