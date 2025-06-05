@@ -34,9 +34,17 @@ jobs:
           push: true
           tags: ${{secrets.DOCKERHUB_USERNAME}}/tp-devops-database:latest
           
+      - name: Build image and push frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./front-end
+          push: true
+          tags: ${{secrets.DOCKERHUB_USERNAME}}/tp-devops-frontend:latest
+
       - name: Build image and push httpd
         uses: docker/build-push-action@v6
         with:
           context: ./http-server
           push: true
           tags: ${{secrets.DOCKERHUB_USERNAME}}/tp-devops-httpd:latest
+            - name: Build image and push httpd
