@@ -7,10 +7,12 @@
     name: database
     image: rorodu92/tp-devops-database
     state: started
+    pull: true
+    recreate: true
+    force_kill: true
     restart_policy: always
     networks:
       - name: app-network
-
     env:
       POSTGRES_USER: "{{ database_user }}"
       POSTGRES_PASSWORD: "{{ database_password }}"

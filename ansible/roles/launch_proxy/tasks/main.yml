@@ -3,6 +3,9 @@
     name: httpd
     image: rorodu92/tp-devops-httpd
     state: started
+    pull: true
+    recreate: true
+    force_kill: true
     restart_policy: always
     networks:
       - name: app-network

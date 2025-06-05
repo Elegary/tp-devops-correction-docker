@@ -3,6 +3,9 @@
     name: frontend
     image: rorodu92/tp-devops-frontend
     state: started
+    pull: true
+    recreate: true
+    force_kill: true
     restart_policy: always
     networks:
       - name: app-network
