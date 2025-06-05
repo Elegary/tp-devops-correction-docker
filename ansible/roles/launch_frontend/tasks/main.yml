@@ -1,0 +1,10 @@
+- name: Run frontend container
+  docker_container:
+    name: frontend
+    image: rorodu92/tp-devops-frontend
+    state: started
+    restart_policy: always
+    networks:
+      - name: app-network
+    env:
+      NODE_ENV: production
